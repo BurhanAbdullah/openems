@@ -52,12 +52,12 @@ class SocReservePolicyTest {
 	private static GlobalOptimizationContext context(int capacity, List<GlobalOptimizationContext.Period> periods) {
 		return new GlobalOptimizationContext(//
 				java.time.Clock.systemUTC(),
-				Environment.OFF_GRID,
+				Environment.TEST,
 				LocalDateTime.of(2026, 9, 15, 0, 0).atZone(ZoneId.of("UTC")),
 				ImmutableList.of(),
 				ImmutableList.of(),
 				null,
-				new GlobalOptimizationContext.Ess(0, capacity, 10_000, 10_000),
+				null,
 				new Periods(periods));
 	}
 
