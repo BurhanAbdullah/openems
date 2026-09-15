@@ -3,15 +3,18 @@ package io.openems.edge.controller.ess.timeofusetariff;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.google.common.collect.ImmutableList;
+
+import io.openems.edge.energy.api.Environment;
 import io.openems.edge.energy.api.simulation.GlobalOptimizationContext;
 import io.openems.edge.energy.api.simulation.periods.PeriodData;
+import io.openems.edge.energy.api.simulation.periods.Periods;
 
 class SocReservePolicyTest {
 
@@ -26,7 +29,6 @@ class SocReservePolicyTest {
 	void shouldIncreaseReserveWithForecastDeficit() {
 		final var goc = context(10_000, List.of(period(LocalDateTime.of(2026, 9, 15, 12, 0), 0, 5000)));
 
-		// A one-hour 5 kW deficit is 0.5 SoC; with weight 0.5, reserve becomes 45%.
 		assertEquals(45, SocReservePolicy.calculateReserveSoc(goc, 0.20, 0.80, 0.50));
 	}
 
@@ -49,12 +51,14 @@ class SocReservePolicyTest {
 
 	private static GlobalOptimizationContext context(int capacity, List<GlobalOptimizationContext.Period> periods) {
 		return new GlobalOptimizationContext(//
-				periods,
-				new GlobalOptimizationContext.Ess(capacity, 0, 0, 0),
+				java.time.Clock.systemUTC(),
+				Environment.OFF_GRID,
+				LocalDateTime.of(2026, 9, 15, 0, 0).atZone(ZoneId.of("UTC")),
+				ImmutableList.of(),
+				ImmutableList.of(),
 				null,
-				null,
-				null,
-				null);
+				new GlobalOptimizationContext.Ess(0, capacity, 10_000, 10_000),
+				new Periods(periods));
 	}
 
 	private static GlobalOptimizationContext.Period period(LocalDateTime time, int production, int consumption) {
